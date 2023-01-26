@@ -5,6 +5,12 @@ import http from 'node:http';// tas http modulis, kuris yra node
 //import fetch from 'node:fetch'; taip pasakome, kad norime nativ fetch, kuris ateina is node, ne is npm
 import config from '../config.js';
 
+import { PageHome } from '../pages/home.js';
+import { PageAbout } from '../pages/about.js';
+import { PageServices } from '../pages/services.js';
+import { Page404 } from '../pages/404.js';
+import { PageContact } from '../pages/contact.js';
+
 const server = {};
 
 //sukurem programa, bet jai reikia porto, kad veiktu, musu atveju localhost:11101
@@ -12,7 +18,7 @@ const server = {};
 server.httpServer = http.createServer((req, res) => {
     const ssl = req.socket.encryption ? 's' : ''; //tikrinam, ar http yra https 
     const baseURL = `http${ssl}://${req.headers.host}`;
-    const parseURL = new URL(req.url, baseURL); //issiaiskiname, kur kreipiamasi
+    const parseURL = new URL(req.url, baseURL); // issiaiskiname, kur kreipiamasi
     const trimmedPath = parseURL.pathname
         .replace(/^\/+|\/+$/g, '')
         .replace(/\/\/+/g, '/');
@@ -24,20 +30,24 @@ server.httpServer = http.createServer((req, res) => {
     req.on('end', () => {
         console.log('uzklausa pilnai gauta');
         //siunciam atsakyma
-        res.end(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    CONTENT
-</body>
-</html>`);
+
+        let PageClass = server.routes[404];
+        if (trimmedPath in server.routes) { //ar reiksme yra viena is objekto key?
+            PageClass = server.routes[trimmedPath]; //istrauki raktazodi is objekto ir ji priskirti
+        }
+
+        const page = new PageClass()
+        res.end(page.render());
     })
 })
+
+server.routes = {
+    '': PageHome,
+    'about': PageAbout,
+    'servicers': PageServices,
+    'contact': PageContact,
+    '404': Page404,
+};
 
 server.init = () => {
     const { port } = config; //destrukturizuojam porta(key) is config objekto

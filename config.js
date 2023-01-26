@@ -13,6 +13,6 @@ config.prod = {
 //console.log(process.env.NODE_ENV); // konsole siaip paleidzia suktis programos procesa
 
 const envName = process.env.NODE_ENV;
-const env = config[envName] ? config[envName] : config.dev;
+const envObj = config[envName] ? config[envName] : config.dev;
 
-export default env;
+export default envObj;
