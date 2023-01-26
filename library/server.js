@@ -3,6 +3,7 @@ import http from 'node:http';// tas http modulis, kuris yra node
 //atsisiunte galime naudoti jo funkcionaluma
 //kad nesusipykti su node, galima butu parasyti taip:
 //import fetch from 'node:fetch'; taip pasakome, kad norime nativ fetch, kuris ateina is node, ne is npm
+import config from '../config.js';
 
 const server = {};
 
@@ -11,7 +12,7 @@ const server = {};
 server.httpServer = http.createServer((req, res) => {
     const ssl = req.socket.encryption ? 's' : ''; //tikrinam, ar http yra https 
     const baseURL = `http${ssl}://${req.headers.host}`;
-    const parseURL = new URL(req.url, baseURL);
+    const parseURL = new URL(req.url, baseURL); //issiaiskiname, kur kreipiamasi
     const trimmedPath = parseURL.pathname
         .replace(/^\/+|\/+$/g, '')
         .replace(/\/\/+/g, '/');
@@ -39,8 +40,11 @@ server.httpServer = http.createServer((req, res) => {
 })
 
 server.init = () => {
-    console.log('paleidinejam serveri');
-    server.httpServer.listen(11101);// ties sia eilute serveris jau sukasi ir nebaigineja darbo
+    const { port } = config; //destrukturizuojam porta(key) is config objekto
+    server.httpServer.listen(port, () => {
+        console.log(config);
+        console.log(`Projekto nuoroda: http://localhost:${port}`);
+    });
 }
 
 export { server }
